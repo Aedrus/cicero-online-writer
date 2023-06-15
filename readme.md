@@ -4,7 +4,9 @@ Cicero is an easy-to-use and flexible writing webapp for authors and writers. It
 
 Cicero is great for both novice and advanced writers who have different workflows and writing styles. The software you use should never get in the way of what matters most: writing a creative story.
 
-Below you will find an in-depth overview into how Cicero was created, my personal process, and justification for engineering decisions. Be warned, it is intended for developers and covers a lot of technical jargon.
+> Please keep in mind that this repository contains source code instead of a deployed build in order to show the process of how Cicero was built.
+
+Below you will find a transparent overview into how Cicero was created, my personal process, and justification for engineering decisions. Be warned, the below section is intended for developers and covers a lot of technical jargon.
 
 ## Project Overview
 Cicero runs on the ever-popular MERN stack which utilizes:
@@ -31,7 +33,7 @@ The frontend UX/UI was designed from the ground up using **Affinity Designer** a
 ## The Backend
 I chose to begin this project by getting the backend server up and running. The reasoning behind this is that I believe it is better to have the backend set up early to give us room to test data manipulation with the frontend later on.
 
-We begin by setting up our project, importing packages, and creating our node/express app within the server.js file. This will get us up and running so we can test our routing handlers with HTTP requests using postman.
+We start by setting up our project, importing packages, and creating our node/express app within the server.js file. This will get us up and running so we can test our routing handlers with HTTP requests using postman.
 
 ## Developer Checklist
 ### Backend
