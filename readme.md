@@ -8,6 +8,8 @@ Cicero is great for both novice and advanced writers who have different workflow
 
 Below you will find a transparent overview into how Cicero was created, my personal process, and justification for engineering decisions. Be warned, the below section is intended for developers and covers a lot of technical jargon.
 
+**Current Project Progress: 5%**
+
 ## Project Overview
 Cicero runs on the ever-popular MERN stack which utilizes:
 * **MongoDB** - NoSQL database that stores data using documents (JSON).
