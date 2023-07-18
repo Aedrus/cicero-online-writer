@@ -1,0 +1,82 @@
+{
+  "dateCreated": "4-02-2023: 12:00PM",
+  "dateModified": "4-08-2023: 2:00PM",
+  "documentName": "Story 1 - Protagonist Backstory",
+  "keywords": ["backstory", "protagonist", "prewrite", "planning"],
+  "creator": "John Smith",
+  "wordCount": 120,
+  "version": "1.3",
+  "body": {
+    "comments": [
+      {
+        "id": "comment1",
+        "dateCreated": "4-03-2023 17:25:15",
+        "comment": "In this scene, we set up the protagonist's hatred for injustice by showing how he lost a dear friend."
+      },
+      {
+        "comment": "This idea is TBD and may not be included in the final draft."
+      }
+    ],
+    "mainSection": {
+      "class": ["main--editor", "99fjoslj",  "cicero-8028347"],
+      "content":
+      {
+          "class": ["sc-7f97ssf0", "8047307-editor wrapper"],
+          "elements": [
+            {
+              "class": ["0o7gf", "editor--style--heading1"],
+              "type": "h1",
+              "text": "How I Found Work as a Freelance Designer."
+            },
+            {
+              "class": ["911gf", "editor--style--standard"],
+              "type": "p",
+              "text": "If you've tried your hand at freelancing only to be met with no results, then this article is for you.",
+              "textBlockStyling": [
+                {
+                "startIndex": 78,
+                "endIndex": 92,
+                "type": "bold"
+                }
+              ]
+            },
+            {
+              "class": ["997gf", "image-style"],
+              "type": "div",
+              "text": "",
+              "elements": [
+                {
+                  "class": ["50fpp", "image-style-large"],
+                  "type": "img",
+                  "url": "https://coolphotos.net/mycat.jpg",
+                  "text": ""
+                }
+              ]
+            },
+            {
+              "class": ["8fa97gf", "image-style"],
+              "type": "ul",
+              "text": "",
+              "elements": [
+                {
+                  "class": ["amfp0dd", "image-style-large"],
+                  "type": "li",
+                  "text": "Learn how to network properly."
+                },
+                {
+                  "class": ["nnbp0dd", "image-style-large"],
+                  "type": "li",
+                  "text": "Hone your skills as a professional."
+                },
+                {
+                  "class": ["pklp0dd", "image-style-large"],
+                  "type": "li",
+                  "text": "Invest in your brand's image."
+                }
+              ]
+            }
+          ]
+        }   
+      }
+    }
+  }

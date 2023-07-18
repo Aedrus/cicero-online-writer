@@ -1,10 +1,8 @@
 # Cicero Writing App
 ## Overview
-Cicero is an easy-to-use and flexible writing webapp for authors and writers. It offers a full host of tools and functionality that don't get in the way of the user's creativity. 
+Cicero is an easy-to-use and flexible online writer for authors and writers. It offers a full host of tools and functionality with the goal of never getting in the way of the user's creativity.
 
-Cicero is great for both novice and advanced writers who have different workflows and writing styles. The software you use should never get in the way of what matters most: writing a creative story.
-
-> Please keep in mind that this repository contains source code instead of a deployed build in order to show the process of how Cicero was built.
+Cicero is great for both novice and advanced writers who have different workflows and writing styles. Cicero embodies the principle that the software you use should never get in the way of what matters most: writing a creative story.
 
 Below you will find a transparent overview into how Cicero was created, my personal process, and justification for engineering decisions. Be warned, the below section is intended for developers and covers a lot of technical jargon.
 
@@ -33,19 +31,40 @@ Alongside those, we are using some extra packages for Cicero's backend:
 The frontend UX/UI was designed from the ground up using **Affinity Designer** and **Figma**. A great deal of planning and research was carried out to ensure the final product was user friendly and competitive with similar software. A more in-depth overview of the UX/UI design process for this project can be found on my [portfolio](http://marioferrera.com).
 
 ## The Backend
-I chose to begin this project by getting the backend server up and running. The reasoning behind this is that I believe it is better to have the backend set up early to give us room to test data manipulation with the frontend later on.
+For Cicero, I chose to start with engineering the backend before the frontend. The reasoning behind this is that it is better to have the backend set up early to create room for testing data manipulation later on.
 
-We start by setting up our project, importing packages, and creating our node/express app within the server.js file. This will get us up and running so we can test our routing handlers with HTTP requests using postman.
+First, we need to setup the project infrastructure by creating the directory, installing packages with NPM, and creating the node/express app within the server.js file entrypoint. This will get us up and running so we can test our routing handlers with HTTP requests using postman. I also get our database setup with MongoDB and connect it to our server.
+
+Next, we start defining the actual router API's that handle typical HTTP requests (GET, PUT, DELETE, etc.). Routing is the equivalent of a team of post office workers who handle the process of receiving a request to send a package (request), verifying and shipping the request (controller), and ensuring that the package passes some benchmarks before being shipped off (models).
+
+The core components are as follows:
+- **Models** - These .js files define the structure of data coming into the database. Using a schema, the model ensures that no data is added to a path in the DB without meeting certain structural requirements.
+- **Controllers** - These .js files handle the actual process of making a request through a router. Controllers contain various functions for each type of request (get, delete, etc.) and often utilize a model.
+- **Routes** - These .js files hold the top-level routers for a collection. The relative controller functions get plugged into this file which creates a fully-functional router.
+
+### Route Creation
+
+The first routing handler group we will work on is Documents. **Documents** in this enviroment refer to the pages that the user fills with text and then uploads to the database so they can be opened and closed at will. This concept can be translated to personal software where data moves through the user's hard drive rather than a database.
+
+The process is as follows:
+- Setup our schema and model for what a document should contain. In this case, we laid out some document info at the top as well as the structure of each document using HTML elements.
+- Setup controllers for each CRUD operation. We cover everything from creating a document to deleting multiple documents based on a query.
+- Assign our controllers to each route in our router file. These contain the directory of our documents based on the REST methodology.
+
+We also did the same thing with the user routes. Here we setup user registration and login which also utilized bcrypt for password hashing and jsonwebtoken for authentication. Here's why we used these two libraries.
+- **bcrypt** - This offers the ability to hash or encrypt the user's password when registering. To ensure that a user's password is protected, in the event of any leaks, we use this encryption on the passwords.
+- **jsonwebtoken** - This handles how we differentiate between user sessions. Basically, in order to show the correct data for the correct user, we attach a unique web token to a specific user account. Then when a user logs in with that accounts credentials they get access to that unique session and its web token—i.e. they can see all the documents attached to that user.
 
 ## Developer Checklist
 ### Backend
-- [ ] Setup routing handlers + controllers for HTTP requests.
-- [ ] Setup database with MongoDB.
-- [ ] Define base models and schema for major data using Mongoose.
+- [X] Setup temp. database with MongoDB.
+- [X] Define base models and schema for major data using Mongoose.
+- [X] Setup routing handlers + controllers for HTTP requests.
+  - [X] Document (page) routing handlers.
+  - [X] User Login and Registration routing handlers.
+- [ ] Implement user authentication and sessions.
 - [ ] Create a secure API for handling the request of sensitive information for use on server.
 - [ ] Define a potential theshold for data or artificial limit to take into account database storage limitations.
-- [ ] Implement user accounts and authentication.
-- [ ] Implement unique views and data depending on user account.
 ### Frontend (React)
 - [ ] Build out header bar component.
 - [ ] Build out canvas/writer section component.
