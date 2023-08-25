@@ -9,9 +9,11 @@
   "body": {
     "comments": [
       {
-        "id": "comment1",
+        "class": "comment",
         "dateCreated": "4-03-2023 17:25:15",
-        "comment": "In this scene, we set up the protagonist's hatred for injustice by showing how he lost a dear friend."
+        "type": "string",
+        "color": "red",
+        "commentText": "In this scene, we set up the protagonist's hatred for injustice by showing how he lost a dear friend."
       },
       {
         "comment": "This idea is TBD and may not be included in the final draft."

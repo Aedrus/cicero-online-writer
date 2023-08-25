@@ -7,6 +7,8 @@ const mongoose = require("mongoose");
 const commentSchema = mongoose.Schema({
   id: String,
   dateCreated: {type: Date, immutable: true},
+  type: any,
+  color: String,
   comment: String
 });
 
@@ -29,18 +31,18 @@ elementSchema.add({
 
 // Create a schema object for the structure of data coming in.
 const documentSchema = mongoose.Schema({
-  documentName: {type: String, minLength: 1, required: true},
-  documentIcon: {type: String, color: String},
   dateCreated: {type: Date, immutable: true, required: false},
   dateModified: {type: Date, immutable: false},
+  documentName: {type: String, minLength: 1, required: true},
+  documentIcon: {type: String, color: String},
   keywords: [String],
-  creator: String,
-  wordCount: Number,
-  version: String,
+  creator: string,
+  wordCount: number,
+  version: string,
   body: {
     comments: [commentSchema],
     mainSection: {
-      class: [String],
+      id: [String],
       content: {
         class: [String],
         elements: [elementSchema]

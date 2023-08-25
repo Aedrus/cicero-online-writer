@@ -48,20 +48,21 @@ exports.updateDocument = asyncHandler(async (req, res, next) => {
 
 // Controller for DELETE request. Deletes many documents.
 exports.deleteManyDocuments = async (req, res, next) => {
-  // Find the documents matching filter and delete them.
   const result = await Document.deleteMany({documentName: req.query.filter})
-  // Return deleted document count and filter query.
-  return res.status(200).json({msg: `${result.deletedCount} deleted from database with filter ${req.query.filter}.`})
+  if (result.deletedCount === 0) {
+    return res.status(404).json({msg: `Could not find documents with filter ${req.query.filter}`})
+  }
+  return res.status(200).json({msg: `${result.deletedCount} deleted from database with filter, ${req.query.filter}.`})
 };
 
 // Controller for DELETE request. Deletes a single document.
 exports.deleteDocument = async (req, res, next) => {
-  // Check for correct id length.
   if (req.params.id.length !== 24) {
     return res.status(404).json({error: "Id length not valid. Please recheck your query."})
   }
-  // Find the document requested for deletion and delete it.
   const doc = await Document.findByIdAndDelete(req.params.id);
-  // Return deleted document.
+  if (doc == null) {
+    return res.status(404).json({msg: "Could not find document."})
+  }
   return res.status(200).json({msg: `Document with ID of ${req.params.id} was deleted from database.`});
 };
