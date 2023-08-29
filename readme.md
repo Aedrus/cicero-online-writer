@@ -113,6 +113,7 @@ Trying to make content editable:
   - [X] User Account Deletion routing handlers.
 - [X] Implement user authentication middleware via web tokens.
 - [ ] Implement user access and request authentication using JWT and cookies.
+- [ ] Implement data storage and cross-session access for user documents.
 - [ ] Create a secure API for handling the request of sensitive information for use on server.
 - [ ] Define a potential theshold for data or artificial limit to take into account database storage limitations.
 ### Frontend (React)
@@ -124,7 +125,9 @@ Trying to make content editable:
 - [X] Build right sidebar component.
 - [X] Build left dropdown menu component.
 - [ ] Build modals and popup setting components.
-- [ ] Engineer solution for creating a WYSIWYG writer within canvas using contenteditable and other functionality.
+- [X] Engineer slate editor to include custom styles of bold, italic, etc.
+- [ ] Engineer slate editor to include type styles like align center, left, etc.
+- [ ] Modify Slate "Editable" architecture to align with schema.
 - [ ] Enhance writer functionality to include things like inline tabbing, structure for headings and paragraphs, and others.
 - [ ] Setup hooks, states, and other functionality for mutable data.
 - [ ] Define stylesheets for components.

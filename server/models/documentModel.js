@@ -3,7 +3,7 @@
 // ==========================================
 const mongoose = require("mongoose");
 
-// Schema for comments object.
+// Schema for comment data.
 const commentSchema = mongoose.Schema({
   id: String,
   dateCreated: {type: Date, immutable: true},
@@ -23,6 +23,7 @@ const textStylingSchema = mongoose.Schema({
 const elementSchema = new mongoose.Schema();
 elementSchema.add({
   class: [String],
+  nodeType: String,
   type: String,
   text: String,
   textBlockStyling: [textStylingSchema],
@@ -41,11 +42,10 @@ const documentSchema = mongoose.Schema({
   version: string,
   body: {
     comments: [commentSchema],
-    mainSection: {
+    article: {
       id: [String],
       content: {
-        class: [String],
-        elements: [elementSchema]
+          elements: [elementSchema]
         }
       }
     }

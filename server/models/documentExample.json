@@ -2,6 +2,7 @@
   "dateCreated": "4-02-2023: 12:00PM",
   "dateModified": "4-08-2023: 2:00PM",
   "documentName": "Story 1 - Protagonist Backstory",
+  "description": "A self-contained document written by the user.",
   "keywords": ["backstory", "protagonist", "prewrite", "planning"],
   "creator": "John Smith",
   "wordCount": 120,
@@ -16,23 +17,28 @@
         "commentText": "In this scene, we set up the protagonist's hatred for injustice by showing how he lost a dear friend."
       },
       {
+        "class": "comment",
+        "dateCreated": "4-03-2023 17:25:15",
+        "type": "string",
+        "color": "red",
         "comment": "This idea is TBD and may not be included in the final draft."
       }
     ],
-    "mainSection": {
-      "class": ["main--editor", "99fjoslj",  "cicero-8028347"],
+    "article": {
+      "id": ["main-editor", "cicero-8028347"],
       "content":
       {
-          "class": ["sc-7f97ssf0", "8047307-editor wrapper"],
           "elements": [
             {
-              "class": ["0o7gf", "editor--style--heading1"],
-              "type": "h1",
+              "class": ["0o7gf", "editor__style__h1"],
+              "nodeType": "h1",
+              "type": "string",
               "text": "How I Found Work as a Freelance Designer."
             },
             {
-              "class": ["911gf", "editor--style--standard"],
-              "type": "p",
+              "class": ["911gf", "editor__style__paragraph"],
+              "nodeType": "p",
+              "type": "string",
               "text": "If you've tried your hand at freelancing only to be met with no results, then this article is for you.",
               "textBlockStyling": [
                 {
