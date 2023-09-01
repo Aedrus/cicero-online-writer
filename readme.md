@@ -126,7 +126,8 @@ Trying to make content editable:
 - [X] Build left dropdown menu component.
 - [ ] Build modals and popup setting components.
 - [X] Engineer slate editor to include custom styles of bold, italic, etc.
-- [ ] Engineer slate editor to include type styles like align center, left, etc.
+- [X] Engineer slate editor to include type styles like align center, left, etc.
+- [ ] Engineer slate editor to include type styles like H1, H2, etc.
 - [ ] Modify Slate "Editable" architecture to align with schema.
 - [ ] Enhance writer functionality to include things like inline tabbing, structure for headings and paragraphs, and others.
 - [ ] Setup hooks, states, and other functionality for mutable data.
@@ -143,3 +144,10 @@ Trying to make content editable:
 - [ ] Implement accessibility within navigation.
 ### SEO
 - [ ] TBD
+
+## Bugs and Issues
+### Backend
+- [ ] 
+
+### Frontend
+- [X] Text align does is buggy/does not work properly when selecting multiple lines of text that are different alignments.

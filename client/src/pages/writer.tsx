@@ -1,11 +1,11 @@
 // Module Imports
 import { useCallback, useState } from 'react';
-import { createEditor, BaseEditor, Descendant, Editor, Element as SlateElement , Transforms } from 'slate';
+import { createEditor, BaseEditor, Descendant, Editor, Element as SlateElement, Transforms } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
+import { isKeyLast, findIndexOf } from '../lib/writerMethods'
 
 // Component Imports
 import Navbar from '../components/Topbar';
-import { match } from 'assert';
 // import CommentPanel from '../components/CommentPanel';
 // import LeftSidebar from '../components/LeftSidebar';
 // import RightSidebar from '../components/RightSidebar';
@@ -14,7 +14,7 @@ import { match } from 'assert';
 
 // Typescript Declerations - Slate
 type CustomText = { text: string };
-type CustomElement = { type: 'paragraph', children: CustomText[] };
+type CustomElement = { type: 'paragraph', align?: string, children: CustomText[] };
 
 declare module 'slate' {
     interface CustomTypes {
@@ -24,27 +24,6 @@ declare module 'slate' {
     }
 }
 
-// Hotkey objects for marks and types.
-const MARK_HOTKEYS = {
-    b: 'bold',
-    i: 'italic',
-    u: 'underline',
-    '`': 'code'
-}
-const TYPE_HOTKEYS = {
-    j: 'center',
-    l: 'left',
-    r: 'right',
-}
-
-// Object with CSS Classes for elements.
-const STYLE_TYPES = {
-    alignCenter: 'center',
-    alignRight: 'right',
-    alignLeft: 'left'
-}
-
-
 // Defines default value for Slate's editable area.
 const initialValue: Descendant[] = [
     {
@@ -53,17 +32,51 @@ const initialValue: Descendant[] = [
     }
 ]
 
+// Hotkey object for marks and types.
+const MARK_HOTKEYS = {
+    // shift_keys: {},
+    // shift_ctrl_keys: {},
+    // shift_alt_keys: {},
+    // shift_ctrl_alt_keys: {},
+    // alt_keys: {},
+    ctrl: {
+        mod: {ctrlKey: true},
+        b: 'bold',
+        i: 'italic',
+        u: 'underline',
+        '`': 'code'
+    },
+    alt: {
+        mod: {ctrlKey: true, altKey: true},
+        x: 'strikethrough'
+    }
+};
+
+let TYPE_HOTKEYS = {
+    mod: { altKey: true },
+    l: 'left',
+    r: 'right',
+    t: 'center',
+    j: 'justify'
+}
+
+// Object with CSS Classes for elements.
+const STYLE_TYPES = {
+    alignCenter: 'center',
+    alignRight: 'right',
+    alignLeft: 'left',
+    alignJustify: 'justify',
+}
+
+
 // Writer Component
 export const Writer = () => {
-    // Create editor with state.
     const [editor] = useState(() => withReact(createEditor()));
 
-    // Custom Element renderer for new line.
     const newLine = useCallback((props: any) => {
         return <Element {...props} />
     }, [])
 
-    // Custom Leaf Renderer for bold text.
     const newLeaf = useCallback((props: any) => {
         return <Leaf {...props} />
     }, [])
@@ -73,30 +86,14 @@ export const Writer = () => {
         <Navbar />
         <Slate editor={editor} initialValue={initialValue} >
             <Editable
+                spellCheck
                 id='canvas'
                 as={'article'}
                 renderElement={newLine}
                 renderLeaf={newLeaf}
                 onKeyDown={event => {
-                    let markHotkeys: keyof typeof MARK_HOTKEYS;
-                    let typeHotkeys: keyof typeof TYPE_HOTKEYS;
-
-                    for (markHotkeys in MARK_HOTKEYS) {
-                        if (isKeybindPressed(markHotkeys, event)) {
-                            event.preventDefault();
-                            const mark = MARK_HOTKEYS[markHotkeys];
-                            toggleMark(editor, mark);
-                        }
-                    }
-
-                    for (typeHotkeys in TYPE_HOTKEYS) {
-                        if (isKeybindPressed(typeHotkeys, event)) {
-                            event.preventDefault();
-                            const align = TYPE_HOTKEYS[typeHotkeys];
-                            toggleType(editor, align);
-                        }
-                    }
-
+                    applyCustomStyle(editor, event, MARK_HOTKEYS, toggleMark);
+                    applyCustomStyle(editor, event, TYPE_HOTKEYS, toggleTypeProp);
                 }}            
             />
         </Slate>
@@ -109,87 +106,262 @@ export const Writer = () => {
     );
 }
 
-// Method to check if a key is being pressed during event.
-const isKeybindPressed = (key: string, event: any) => {
-    if (key === event.key && event.ctrlKey) {
-        return true;
+/* 
+================================================
+1: Text Styling Methods
+================================================
+*/
+
+const applyCustomStyle = (editor: Editor, event: any , styleObj: any, toggleStyle: Function) => {
+    for (let item in styleObj) {
+        if (typeof styleObj[item] === 'object' && styleObj[item] !== null) {
+            applyCustomStyle(editor, event, styleObj[item], toggleStyle);  
+        }
+
+        else {
+            const mod = styleObj.mod;
+
+            if (isKeybindPressed(item, event, mod)) {
+                event.preventDefault();
+                const prop = styleObj[item];
+                toggleStyle(editor, prop);
+            }
+        }
+    }
+} 
+
+const modPreCheck = (object: any, event: any): boolean => {
+    const LENGTH = Object.keys(object).length;
+
+    if (LENGTH > 1) {
+        // Combo 1: Control + Alt
+        if (event.getModifierState('Control') && event.getModifierState('Alt') && !event.getModifierState('Shift')) {
+
+            for (let item in object) {
+                if ( (item === 'ctrlKey' || item === 'altKey')) {
+                    if (!isKeyLast(object , findIndexOf(object, item))) {
+                        continue;
+                    }
+
+                    else { return true }
+                }
+
+                else { return false }
+            }
+        }
+        // Combo 2: Control + Shift
+        if (event.getModifierState('Control') && !event.getModifierState('Alt') && event.getModifierState('Shift')) {
+
+            for (let item in object) {
+                if ( (item === 'ctrlKey' || item === 'shiftKey')) {
+                    if (!isKeyLast(object , findIndexOf(object, item))) {
+                        continue;
+                    } 
+
+                    else { return true }
+                }
+
+                else { return false }
+            }
+        }
+        // Combo 3: Alt + Shift
+        if (!event.getModifierState('Control') && event.getModifierState('Alt') && event.getModifierState('Shift')) {
+
+            for (let item in object) {
+                if ( (item === 'altKey' || item === 'shiftKey')) {
+                    if (!isKeyLast(object , findIndexOf(object, item))) {
+                        continue;
+                    } 
+
+                    else { return true }
+                }
+
+                else { return false }
+            }
+        }
+        // Combo 4: Ctrl + Alt + Shift
+        if (event.getModifierState('Control') && event.getModifierState('Alt') && event.getModifierState('Shift')) {
+
+            for (let item in object) {
+                if ( (item === 'ctrlKey' || item === 'altKey' || item === 'shiftKey')) {
+                    if (!isKeyLast(object , findIndexOf(object, item))) {
+                        continue;
+                    } 
+
+                    else { return true }
+                }
+
+                else { return false }
+            }
+        }
+    }
+
+    else {
+        // Combo 5: Ctrl Only
+        if (event.getModifierState('Control') && !event.getModifierState('Alt') && !event.getModifierState('Shift')) {
+
+            for (let item in object) {
+                if (item === 'ctrlKey') { 
+                    return true
+                }
+
+                else { return false }
+            }
+        }
+        // Combo 6: Alt Only
+        if (!event.getModifierState('Control') && event.getModifierState('Alt') && !event.getModifierState('Shift')) {
+
+            for (let item in object) {
+                if (item === 'altKey') { 
+                    return true
+                }
+
+                else { return false }
+            }
+        }
+        // Combo 7: Shift Only
+        if (!event.getModifierState('Control') && !event.getModifierState('Alt') && event.getModifierState('Shift')) {
+
+            for (let item in object) {
+                if (item === 'shiftKey') { 
+                    return true
+                }
+
+                else { return false }
+            }
+        }
+    }
+    return false;
+}
+
+const isKeybindPressed = (key: string, event: any, mod: any) => {
+    if (key === event.key) {
+        if (modPreCheck(mod, event)) {
+            return true;
+        }
     }
     else {
         return false;
     }
 }
 
-// Method to toggle type on currently selected text node.
-const toggleType = (editor: Editor, format: string) => {
+const toggleTypeProp = (editor: Editor, format: string) => {
+    const isActive = isTypePropActive(editor, format);
     let newProperties: Partial<SlateElement>;
-    const isActive = isTypeActive(editor, format);
 
     newProperties = {
-        align: STYLE_TYPES.alignLeft
+        align: format
     } as Partial<SlateElement>
 
-    Transforms.setNodes<SlateElement>(editor, newProperties);
+    if (!isActive) {
+        Transforms.setNodes<SlateElement>(editor, newProperties)
+    } 
+    else {
+        return;
+    }
 }
 
-// Check to see if the current format (alignment) is on the selected elements.
-const isTypeActive = (editor: Editor, format: string): boolean => {
+const checkNodeForAlignment = (editor: Editor, node: any, format: string): boolean => {
+    if (!Editor.isEditor(node) && SlateElement.isElement(node) && node.align === format) {
+        return true;
+    }
+    
+    else {
+        return false;
+    }
+}
+
+const isTypePropActive = (editor: Editor, format: string): boolean => {
+    let isPropActive: boolean = false;
     const { selection } = editor;
+
     if (!selection) {
         return false;
     }
-    // Trying to find out how to check for the align value on selected elements.
-    return false;
+
+    const [selectedNodes] = Array.from( Editor.nodes( editor, { at: Editor.unhangRange( editor, selection )}));
+
+    let node: keyof typeof selectedNodes;
+    for (node in selectedNodes) {
+        if (checkNodeForAlignment(editor, node, format)) {
+            isPropActive = true;
+        }
+
+        else {
+            isPropActive = false;
+            break;
+        }
+    }
+
+    return isPropActive;
 }
 
-// Method to toggle mark on currently selected text node.
 const toggleMark = (editor: Editor, mark: string) => {
     const isActive = isMarkActive(editor, mark);
 
     if (isActive) {
         Editor.removeMark(editor, mark);
-    } else {
+    } 
+    
+    else {
         Editor.addMark(editor, mark, true);
     }
 }
 
-// Check if the mark argument is active in the current editor's selected area.
 const isMarkActive = (editor: Editor, mark: string): boolean => {
-    // Stores the current marks in document.
     const marks = Editor.marks(editor);
 
-    // Checks if the mark argument is found in the marks array.
     return marks ? marks[mark as keyof typeof marks] === true : false;
 }
-// Create new leaf for each type of mark.
+
+/* 
+================================================
+2: Custom Slate Nodes
+================================================
+*/
+
 const Leaf = ({attributes, children, leaf}: any) => {
     if (leaf.bold) {
         children = <strong>{children}</strong>
     }
+
     if (leaf.italic) {
         children = <em>{children}</em>
     }
+
     if (leaf.underline) {
         children = <u>{children}</u>
     }
+
+    if (leaf.strikethrough) {
+        children = <s>{children}</s>
+    }
+
     if (leaf.code) {
         children = <code>{children}</code>
     }
+
     return <span {...attributes}>{children}</span>
 }
 
 const Element = ({attributes, children, element}: any) => {
-    // Fill this out and figure out how to align text.
-    let style = { textAlign: STYLE_TYPES.alignCenter };
+    let alignStyle = { textAlign: STYLE_TYPES.alignLeft };
 
     if (element.align === 'left') {
-        style = { textAlign: STYLE_TYPES.alignLeft}
-    }
-    if (element.align === 'right') {
-        style = { textAlign: STYLE_TYPES.alignRight}
-    }
-    if (element.align === 'center') {
-        style = { textAlign: STYLE_TYPES.alignCenter}
+        alignStyle = { textAlign: STYLE_TYPES.alignLeft}
     }
 
-    return <p style={style} {...attributes}>{children}</p>;
+    if (element.align === 'right') {
+        alignStyle = { textAlign: STYLE_TYPES.alignRight}
+    }
+
+    if (element.align === 'center') {
+        alignStyle = { textAlign: STYLE_TYPES.alignCenter}
+    }
+
+    if (element.align === 'justify') {
+        alignStyle = { textAlign: STYLE_TYPES.alignJustify}
+    }
+
+    return <p style={alignStyle} {...attributes}>{children}</p>;
 }
