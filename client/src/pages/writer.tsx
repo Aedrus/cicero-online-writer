@@ -1,8 +1,9 @@
 // Module Imports
 import { useCallback, useState } from 'react';
-import { createEditor, BaseEditor, Descendant, Editor, Element as SlateElement, Transforms } from 'slate';
+import { createEditor, BaseEditor, Descendant, Editor, Element as SlateElement, Node, Transforms, NodeEntry } from 'slate';
 import { Slate, Editable, withReact, ReactEditor } from 'slate-react';
-import { isKeyLast, findIndexOf } from '../lib/writerMethods'
+import { isKeybindPressed } from '../lib/writerMethods';
+import '../style.css';
 
 // Component Imports
 import Navbar from '../components/Topbar';
@@ -12,15 +13,18 @@ import Navbar from '../components/Topbar';
 // import TypePanel from '../components/TypePanel';
 // import MenuPanel from '../components/MenuPanel';
 
-// Typescript Declerations - Slate
+// Slate Marks
+
+
+// Type Declerations - Slate
 type CustomText = { text: string };
-type CustomElement = { type: 'paragraph', align?: string, children: CustomText[] };
+type CustomElement = { type: string, align?: string, children: CustomText[] };
 
 declare module 'slate' {
     interface CustomTypes {
         Editor: BaseEditor & ReactEditor,
         Element: CustomElement,
-        Text: CustomText
+        Text: CustomText,
     }
 }
 
@@ -32,42 +36,53 @@ const initialValue: Descendant[] = [
     }
 ]
 
-// Hotkey object for marks and types.
+// Hotkey objects
 const MARK_HOTKEYS = {
-    // shift_keys: {},
-    // shift_ctrl_keys: {},
-    // shift_alt_keys: {},
-    // shift_ctrl_alt_keys: {},
-    // alt_keys: {},
     ctrl: {
         mod: {ctrlKey: true},
         b: 'bold',
         i: 'italic',
         u: 'underline',
-        '`': 'code'
+        '`': 'code',
+        '[': 'increase',
+        ']': 'decrease',
     },
-    alt: {
+    ctrl_alt: {
         mod: {ctrlKey: true, altKey: true},
-        x: 'strikethrough'
+        x: 'strikethrough',
     }
 };
 
-let TYPE_HOTKEYS = {
-    mod: { altKey: true },
-    l: 'left',
-    r: 'right',
-    t: 'center',
-    j: 'justify'
+const TYPE_HOTKEYS = {
+    alt: {
+        mod: { altKey: true },
+        l: 'left',
+        r: 'right',
+        t: 'center',
+        j: 'justify',
+    },
+    ctrl: {
+        mod: { ctrlKey: true },
+        '1': 'heading-one',
+        '2': 'heading-two',
+        '3': 'heading-three',
+        '4': 'heading-four',
+        '5': 'heading-five',
+        '6': 'heading-six',
+        'o': 'paragraph',
+    },
+    ctrl_alt: {
+        mod: { ctrlKey: true, altKey: true },
+        o: 'numbered-list',
+        u: 'bulleted-list',
+    }
 }
 
-// Object with CSS Classes for elements.
-const STYLE_TYPES = {
-    alignCenter: 'center',
-    alignRight: 'right',
-    alignLeft: 'left',
-    alignJustify: 'justify',
+const UTIL_HOTKEYS = {
+    mod: {},
+    backspace: 'Backspace',
+    tab: 'Tab',
 }
-
 
 // Writer Component
 export const Writer = () => {
@@ -94,7 +109,9 @@ export const Writer = () => {
                 onKeyDown={event => {
                     applyCustomStyle(editor, event, MARK_HOTKEYS, toggleMark);
                     applyCustomStyle(editor, event, TYPE_HOTKEYS, toggleTypeProp);
-                }}            
+                    toggleList(editor, event, UTIL_HOTKEYS.backspace);
+                    insertIndent(editor, event, UTIL_HOTKEYS.tab);
+                }}
             />
         </Slate>
         {/* <CommentPanel />
@@ -113,7 +130,7 @@ export const Writer = () => {
 */
 
 const applyCustomStyle = (editor: Editor, event: any , styleObj: any, toggleStyle: Function) => {
-    for (let item in styleObj) {
+    for (const item in styleObj) {
         if (typeof styleObj[item] === 'object' && styleObj[item] !== null) {
             applyCustomStyle(editor, event, styleObj[item], toggleStyle);  
         }
@@ -121,179 +138,47 @@ const applyCustomStyle = (editor: Editor, event: any , styleObj: any, toggleStyl
         else {
             const mod = styleObj.mod;
 
-            if (isKeybindPressed(item, event, mod)) {
+            if (isKeybindPressed(event, item, mod)) {
                 event.preventDefault();
-                const prop = styleObj[item];
-                toggleStyle(editor, prop);
+                const format = styleObj[item];
+                toggleStyle(editor, format);
             }
         }
     }
 } 
 
-const modPreCheck = (object: any, event: any): boolean => {
-    const LENGTH = Object.keys(object).length;
-
-    if (LENGTH > 1) {
-        // Combo 1: Control + Alt
-        if (event.getModifierState('Control') && event.getModifierState('Alt') && !event.getModifierState('Shift')) {
-
-            for (let item in object) {
-                if ( (item === 'ctrlKey' || item === 'altKey')) {
-                    if (!isKeyLast(object , findIndexOf(object, item))) {
-                        continue;
-                    }
-
-                    else { return true }
-                }
-
-                else { return false }
-            }
-        }
-        // Combo 2: Control + Shift
-        if (event.getModifierState('Control') && !event.getModifierState('Alt') && event.getModifierState('Shift')) {
-
-            for (let item in object) {
-                if ( (item === 'ctrlKey' || item === 'shiftKey')) {
-                    if (!isKeyLast(object , findIndexOf(object, item))) {
-                        continue;
-                    } 
-
-                    else { return true }
-                }
-
-                else { return false }
-            }
-        }
-        // Combo 3: Alt + Shift
-        if (!event.getModifierState('Control') && event.getModifierState('Alt') && event.getModifierState('Shift')) {
-
-            for (let item in object) {
-                if ( (item === 'altKey' || item === 'shiftKey')) {
-                    if (!isKeyLast(object , findIndexOf(object, item))) {
-                        continue;
-                    } 
-
-                    else { return true }
-                }
-
-                else { return false }
-            }
-        }
-        // Combo 4: Ctrl + Alt + Shift
-        if (event.getModifierState('Control') && event.getModifierState('Alt') && event.getModifierState('Shift')) {
-
-            for (let item in object) {
-                if ( (item === 'ctrlKey' || item === 'altKey' || item === 'shiftKey')) {
-                    if (!isKeyLast(object , findIndexOf(object, item))) {
-                        continue;
-                    } 
-
-                    else { return true }
-                }
-
-                else { return false }
-            }
-        }
-    }
-
-    else {
-        // Combo 5: Ctrl Only
-        if (event.getModifierState('Control') && !event.getModifierState('Alt') && !event.getModifierState('Shift')) {
-
-            for (let item in object) {
-                if (item === 'ctrlKey') { 
-                    return true
-                }
-
-                else { return false }
-            }
-        }
-        // Combo 6: Alt Only
-        if (!event.getModifierState('Control') && event.getModifierState('Alt') && !event.getModifierState('Shift')) {
-
-            for (let item in object) {
-                if (item === 'altKey') { 
-                    return true
-                }
-
-                else { return false }
-            }
-        }
-        // Combo 7: Shift Only
-        if (!event.getModifierState('Control') && !event.getModifierState('Alt') && event.getModifierState('Shift')) {
-
-            for (let item in object) {
-                if (item === 'shiftKey') { 
-                    return true
-                }
-
-                else { return false }
-            }
-        }
-    }
-    return false;
-}
-
-const isKeybindPressed = (key: string, event: any, mod: any) => {
-    if (key === event.key) {
-        if (modPreCheck(mod, event)) {
-            return true;
-        }
-    }
-    else {
-        return false;
-    }
-}
-
 const toggleTypeProp = (editor: Editor, format: string) => {
-    const isActive = isTypePropActive(editor, format);
+    const isTypeActive = isTypePropActive(editor, format, 'type');
+    const isAlignActive = isTypePropActive(editor, format, 'align');
+    const hasAlign = Object.values(TYPE_HOTKEYS.alt).includes(format);
+    const hasList = Object.values(TYPE_HOTKEYS.ctrl_alt).includes(format);
+
+    Transforms.unwrapNodes(editor, {
+        match: n =>
+          !Editor.isEditor(n) &&
+          SlateElement.isElement(n) &&
+          Object.values(TYPE_HOTKEYS.ctrl_alt).includes(n.type) &&
+          !hasAlign,
+        split: true,
+      })
+
     let newProperties: Partial<SlateElement>;
-
-    newProperties = {
-        align: format
-    } as Partial<SlateElement>
-
-    if (!isActive) {
-        Transforms.setNodes<SlateElement>(editor, newProperties)
-    } 
+    if (hasAlign) {
+        newProperties = { align: format }
+    }
     else {
-        return;
-    }
-}
-
-const checkNodeForAlignment = (editor: Editor, node: any, format: string): boolean => {
-    if (!Editor.isEditor(node) && SlateElement.isElement(node) && node.align === format) {
-        return true;
-    }
-    
-    else {
-        return false;
-    }
-}
-
-const isTypePropActive = (editor: Editor, format: string): boolean => {
-    let isPropActive: boolean = false;
-    const { selection } = editor;
-
-    if (!selection) {
-        return false;
+        newProperties = { type: isTypeActive ? undefined : hasList ? 'list-item': format}
     }
 
-    const [selectedNodes] = Array.from( Editor.nodes( editor, { at: Editor.unhangRange( editor, selection )}));
+    Transforms.setNodes<SlateElement>(editor, newProperties);
 
-    let node: keyof typeof selectedNodes;
-    for (node in selectedNodes) {
-        if (checkNodeForAlignment(editor, node, format)) {
-            isPropActive = true;
-        }
-
-        else {
-            isPropActive = false;
-            break;
-        }
+    if (!isAlignActive && hasList) {
+        const list = { type: format, children: [] };
+        Transforms.wrapNodes(editor, list);
     }
-
-    return isPropActive;
+    if (isTypeActive && hasList) {
+        Transforms.liftNodes(editor);
+    }
 }
 
 const toggleMark = (editor: Editor, mark: string) => {
@@ -306,6 +191,78 @@ const toggleMark = (editor: Editor, mark: string) => {
     else {
         Editor.addMark(editor, mark, true);
     }
+}
+
+const toggleList = (editor: Editor, event: any, key: any) => {
+    const { selection } = editor;
+    if (!selection) { return false };
+
+    const isEmptyString: boolean = Node.leaf(editor, selection.anchor.path).text === "" ? true : false;
+    const isList: boolean = isTypePropActive(editor, 'list-item', 'type');
+
+    if (isKeybindPressed(event, key) && isEmptyString && isList) {
+        event.preventDefault();
+
+        let newProperties: Partial<SlateElement>;
+        newProperties = { type: 'paragraph' };
+
+        Transforms.setNodes<SlateElement>(editor, newProperties, { at: selection });
+        Transforms.liftNodes(editor);
+    }
+}
+
+const insertIndent = (editor: Editor, event: any, key: any) => {
+    const { selection } = editor;
+    if (!selection) {
+        return false 
+    };
+
+    // Check to make sure we are pressing tab key and we are on a list item.
+    if (isKeybindPressed(event, key)) {
+        event.preventDefault();
+        Transforms.insertNodes(
+            editor,
+            {
+              text: "\t",
+            },
+            {
+              at: selection,
+            }
+        )
+    }
+}
+
+const incrementTextSize = (editor: Editor, event: any, key: any, mark: any) => {
+    // Trying to figure out how to select the text, break it apart, add a new 'font-size' style that
+    // increments it based on the previous value, and then wraps it back together. May need a span.
+    if (isKeybindPressed(event, key)) {
+        event.preventDefault();
+        console.log("Ctrl + [ or ] pressed");
+        Editor.addMark(editor, mark, true);
+    }
+}
+
+// ========================
+// Helper Functions
+// ========================
+const isTypePropActive = (editor: Editor, format: string, type: 'type' | 'align'): boolean => {
+    const { selection } = editor;
+
+    if (!selection) {
+        return false;
+    }
+
+    const [match] = Array.from(
+        Editor.nodes(editor, {
+          at: Editor.unhangRange(editor, selection),
+          match: n =>
+            !Editor.isEditor(n) &&
+            SlateElement.isElement(n) &&
+            n[type] === format,
+        })
+      )
+
+    return !!match;
 }
 
 const isMarkActive = (editor: Editor, mark: string): boolean => {
@@ -345,23 +302,61 @@ const Leaf = ({attributes, children, leaf}: any) => {
 }
 
 const Element = ({attributes, children, element}: any) => {
-    let alignStyle = { textAlign: STYLE_TYPES.alignLeft };
+    let alignStyle = { textAlign: TYPE_HOTKEYS.alt.l };
 
-    if (element.align === 'left') {
-        alignStyle = { textAlign: STYLE_TYPES.alignLeft}
+    switch (element.align) {
+        case 'left': {
+            alignStyle = { textAlign: TYPE_HOTKEYS.alt.l }
+            break;
+        }
+        case 'right': {
+            alignStyle = { textAlign: TYPE_HOTKEYS.alt.r }
+            break;
+        }
+        case 'center': {
+            alignStyle = { textAlign: TYPE_HOTKEYS.alt.t }
+            break;
+        }
+        case 'justify': {
+            alignStyle = { textAlign: TYPE_HOTKEYS.alt.j }
+            break;
+        }
     }
 
-    if (element.align === 'right') {
-        alignStyle = { textAlign: STYLE_TYPES.alignRight}
-    }
+    switch (element.type) {
+        case 'heading-one': {
+            return <h1 style={alignStyle} {...attributes}>{children}</h1>
+        }
+        case 'heading-two': {
+            return <h2 style={alignStyle} {...attributes}>{children}</h2>
+        }
+        case 'heading-three': {
+            return <h3 style={alignStyle} {...attributes}>{children}</h3>
+        }
+        case 'heading-four': {
+            return <h4 style={alignStyle} {...attributes}>{children}</h4>
+        }
+        case 'heading-five': {
+            return <h5 style={alignStyle} {...attributes}>{children}</h5>
+        }
+        case 'heading-six': {
+            return <h6 style={alignStyle} {...attributes}>{children}</h6>
+        }
+        case 'paragraph': {
+            return <p style={alignStyle} {...attributes}>{children}</p>
+        }
+        case 'numbered-list': {
+            return <ol style={alignStyle} {...attributes}>{children}</ol>
+        }
+        case 'bulleted-list': {
+            return <ul style={alignStyle} {...attributes}>{children}</ul>
+        }
+        case 'list-item': {
+            return <li style={alignStyle} {...attributes}>{children}</li>
+        }
+        default: {
+            return <p style={alignStyle} {...attributes}>{children}</p>
+        }
 
-    if (element.align === 'center') {
-        alignStyle = { textAlign: STYLE_TYPES.alignCenter}
     }
-
-    if (element.align === 'justify') {
-        alignStyle = { textAlign: STYLE_TYPES.alignJustify}
-    }
-
-    return <p style={alignStyle} {...attributes}>{children}</p>;
 }
