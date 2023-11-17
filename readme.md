@@ -1,4 +1,5 @@
 # Cicero Writing App
+> __NOTICE__: The Cicero Project has been moved to a private repository for internal development. The documentation and file architecture in this repository have been archived for educational purposes. For inquiries about Cicero and its codebase, please reach out to me at mario.ferrera@ardentethos.com
 ## Overview
 Cicero is an easy-to-use and flexible online writer for authors and writers. It offers a full host of tools and functionality with the goal of never getting in the way of the user's creativity.
 
