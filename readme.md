@@ -78,6 +78,12 @@ To start the react app, we can use:
 npm start
 ``
 
+To start the dev environment locally through netlify, we can use:
+
+``
+netlify dev --live
+``
+
 To test the react app, we can use:
 
 ``
@@ -116,6 +122,8 @@ Trying to make content editable:
 - [ ] Implement data storage and cross-session access for user documents.
 - [ ] Create a secure API for handling the request of sensitive information for use on server.
 - [ ] Define a potential theshold for data or artificial limit to take into account database storage limitations.
+- [ ] Refactor database models/schemas based on some modern data structure or paradigm.
+- [ ] Transition to a software/database model that stores documents and files on the PC instead of cloud.
 ### Frontend (React)
 #### Writer
 - [X] Build top navigation bar component.
@@ -127,7 +135,10 @@ Trying to make content editable:
 - [ ] Build modals and popup setting components.
 - [X] Engineer slate editor to include custom styles of bold, italic, etc.
 - [X] Engineer slate editor to include type styles like align center, left, etc.
-- [ ] Engineer slate editor to include type styles like H1, H2, etc.
+- [X] Engineer slate editor to include type styles like H1, H2, etc.
+- [ ] Engineer slate editor to include list styles like unordered and ordered lists that can be ~~toggled on and off~~, ~~cleared per list item~~, and ~~indented via Tab~~.
+- [ ] Engineer slate editor to include option for increasing and decreasing font size. This should be done via a shortcut and have a min and max limit to prevent egregious font sizes.
+- [ ] Engineer slate edito to include font changing via toolbar.
 - [ ] Modify Slate "Editable" architecture to align with schema.
 - [ ] Enhance writer functionality to include things like inline tabbing, structure for headings and paragraphs, and others.
 - [ ] Setup hooks, states, and other functionality for mutable data.
@@ -149,5 +160,7 @@ Trying to make content editable:
 ### Backend
 - [ ] 
 
-### Frontend
-- [X] Text align does is buggy/does not work properly when selecting multiple lines of text that are different alignments.
+### Frontend QOL
+- [X] Text align is buggy/does not work properly when selecting multiple lines of text that are different alignments.
+- [ ] Improve logic of text marks such as bold, italics, and underline such that it does not carry over that mark into the next line. I.e. it should reset to normal text on a new line for all marks.
+- 
